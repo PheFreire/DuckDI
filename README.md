@@ -54,7 +54,7 @@ class IUserRepository:
 ```python
 from duckdi import register
 
-class PostgresUserRepository:
+class PostgresUserRepository(IUserRepository):
     def get_user(self, user_id: str) -> dict:
         return {"id": user_id, "name": "John Doe"}
 
@@ -136,7 +136,7 @@ from duckdi import Interface, register, Get
 class INotifier:
     def send(self, msg: str): ...
 
-class EmailNotifier:
+class EmailNotifier(INotifier):
     def send(self, msg: str):
         print(f"Sending email: {msg}")
 
