@@ -4,20 +4,22 @@
 
 # 🦆 DuckDI
 
-**DuckDI** is a minimal and powerful dependency injection framework for Python, inspired by duck typing and explicit architecture.
+**DuckDI** is a minimal, type-safe and runtime-resolvable dependency injection framework for Python — inspired by duck typing and clean architecture principles.
 
-It allows you to declare your interfaces, register adapters, and resolve dependencies at runtime using a simple TOML file.
+It empowers you to declare interfaces, register adapters, and resolve dependencies via a simple TOML-based injection map.
 
 ---
 
 ## 🚀 Features
 
-- ✅ Clean and lightweight API  
-- ✅ Zero dependencies  
-- ✅ Fully type-safe  
-- ✅ Uses TOML to map interfaces to adapters  
-- ✅ Clear and informative error messages  
-- ✅ Environment-based configuration (`INJECTIONS_PATH`)
+- ✅ Clean, minimal, and explicit API  
+- ✅ Zero runtime dependencies  
+- ✅ Fully type-safe with `Protocol` support  
+- ✅ Environment-based injection configuration (`INJECTIONS_PATH`)  
+- ✅ Informative error handling  
+- ✅ Singleton and transient adapter support  
+- ✅ Runtime-validated adapters with structural checks  
+- ✅ TOML-based mapping for clarity and separation of concerns  
 
 ---
 
@@ -29,7 +31,7 @@ Using [Poetry](https://python-poetry.org):
 poetry add duckdi
 ```
 
-Or manually with pip:
+Or using pip:
 
 ```bash
 pip install duckdi
@@ -49,6 +51,10 @@ class IUserRepository:
     def get_user(self, user_id: str) -> dict: ...
 ```
 
+> You can optionally use `@runtime_checkable` if you want to support `isinstance()` or `issubclass()` checks.
+
+---
+
 ### 2. Register an adapter
 
 ```python
@@ -61,22 +67,34 @@ class PostgresUserRepository(IUserRepository):
 register(PostgresUserRepository)
 ```
 
+For singleton behavior (one instance only):
+
+```python
+register(PostgresUserRepository, is_singleton=True)
+```
+
+---
+
 ### 3. Create your injection payload
 
-Create a file called `injections.toml`:
+Create a file named `injections.toml`:
 
 ```toml
 [injections]
 "user_repository" = "postgres_user_repository"
 ```
 
+---
+
 ### 4. Set the environment variable
 
-You **must** set the path to the injection file using the `INJECTIONS_PATH` environment variable:
+You **must** define the injection file path using the `INJECTIONS_PATH` environment variable:
 
 ```bash
 export INJECTIONS_PATH=./injections.toml
 ```
+
+---
 
 ### 5. Resolve dependencies at runtime
 
@@ -93,12 +111,16 @@ print(user)  # {'id': '123', 'name': 'John Doe'}
 ## 💥 Error Handling
 
 ### `MissingInjectionPayloadError`
-
-Raised when no injection payload file is found at the given path.
+Raised when the injection file is not found or not configured via `INJECTIONS_PATH`.
 
 ### `InvalidAdapterImplementationError`
+Raised when the registered adapter does not implement the required interface.
 
-Raised when the registered adapter does not properly implement the expected interface.
+### `InterfaceAlreadyRegisteredError`
+Raised when an interface is registered twice with the same name or label.
+
+### `AdapterAlreadyRegisteredError`
+Raised when an adapter is registered more than once under the same label.
 
 ---
 
@@ -110,24 +132,33 @@ duckdi/
 ├── README.md
 ├── src/
 │   └── duckdi/
-│       ├── duck.py
 │       ├── __init__.py
+│       ├── cli.py
 │       ├── errors/
 │       │   ├── __init__.py
+│       │   ├── adapter_already_registered_error.py
+│       │   ├── interface_already_registered_error.py
 │       │   ├── invalid_adapter_implementation_error.py
 │       │   └── missing_injection_payload_error.py
+│       ├── injections/
+│       │   ├── injections_container.py
+│       │   ├── injections_payload.py
 │       └── utils/
 │           ├── __init__.py
 │           ├── buffer_readers.py
-│           └── serializers.py
+│           ├── serializers.py
+│           └── to_snake.py
 └── tests/
+    ├── test_register.py
+    ├── test_get.py
+    ├── test_interface.py
 ```
 
 ---
 
 ## 🧩 Advanced Example
 
-You can register multiple adapters and resolve them dynamically:
+Registering and resolving different services dynamically:
 
 ```python
 from duckdi import Interface, register, Get
@@ -152,14 +183,36 @@ notifier.send("Hello from DuckDI!")
 
 ---
 
+## 🧪 Testing
+
+DuckDI supports full static type checking. You can run tests with:
+
+```bash
+make test
+```
+
+Or directly:
+
+```bash
+pytest
+```
+
+To check types and formatting:
+
+```bash
+make check
+```
+
+---
+
 ## 📄 License
 
 Licensed under the MIT License.  
-See the [LICENSE](LICENSE) file for more information.
+See the [LICENSE](LICENSE) file for details.
 
 ---
 
 ## 👤 Author
 
 Developed with ❤️ by **PhePato**  
-Pull requests, feedback and contributions are welcome!
+Pull requests, discussions, and contributions are always welcome!
