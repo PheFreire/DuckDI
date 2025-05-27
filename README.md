@@ -4,28 +4,29 @@
 
 # 🦆 DuckDI
 
-**DuckDI** is a minimal, type-safe and runtime-resolvable dependency injection framework for Python — inspired by duck typing and clean architecture principles.
+**DuckDI** is a minimal, type-safe, and architecture-friendly dependency injection library for Python.
 
-It empowers you to declare interfaces, register adapters, and resolve dependencies via a simple TOML-based injection map.
+It provides a clean interface to register and resolve dependencies at runtime using a TOML-based configuration, following the duck typing principle: _"if it implements the expected methods, it’s good enough."_  
+Ideal for developers who want clarity, zero magic, and full control over dependency resolution.
 
 ---
 
 ## 🚀 Features
 
-- ✅ Clean, minimal, and explicit API  
+- ✅ Clean and lightweight API  
 - ✅ Zero runtime dependencies  
-- ✅ Fully type-safe with `Protocol` support  
-- ✅ Environment-based injection configuration (`INJECTIONS_PATH`)  
-- ✅ Informative error handling  
-- ✅ Singleton and transient adapter support  
-- ✅ Runtime-validated adapters with structural checks  
-- ✅ TOML-based mapping for clarity and separation of concerns  
+- ✅ Fully type-safe (no introspection magic)  
+- ✅ Supports singleton and transient resolution  
+- ✅ Uses TOML to bind interfaces to adapters  
+- ✅ Works with `ABC` and regular classes (no need for Protocols)  
+- ✅ Clear and informative error messages  
+- ✅ Environment-based configuration (`INJECTIONS_PATH`)  
 
 ---
 
 ## 📦 Installation
 
-Using [Poetry](https://python-poetry.org):
+With [Poetry](https://python-poetry.org):
 
 ```bash
 poetry add duckdi
@@ -45,13 +46,13 @@ pip install duckdi
 
 ```python
 from duckdi import Interface
+from abc import ABC, abstractmethod
 
 @Interface
-class IUserRepository:
+class IUserRepository(ABC):
+    @abstractmethod
     def get_user(self, user_id: str) -> dict: ...
 ```
-
-> You can optionally use `@runtime_checkable` if you want to support `isinstance()` or `issubclass()` checks.
 
 ---
 
@@ -67,7 +68,7 @@ class PostgresUserRepository(IUserRepository):
 register(PostgresUserRepository)
 ```
 
-For singleton behavior (one instance only):
+You can also register it as a singleton:
 
 ```python
 register(PostgresUserRepository, is_singleton=True)
@@ -77,18 +78,18 @@ register(PostgresUserRepository, is_singleton=True)
 
 ### 3. Create your injection payload
 
-Create a file named `injections.toml`:
+Create a file called `injections.toml`:
 
 ```toml
 [injections]
-"user_repository" = "postgres_user_repository"
+"i_user_repository" = "postgres_user_repository"
 ```
 
 ---
 
 ### 4. Set the environment variable
 
-You **must** define the injection file path using the `INJECTIONS_PATH` environment variable:
+Set the injection file path using the `INJECTIONS_PATH` environment variable:
 
 ```bash
 export INJECTIONS_PATH=./injections.toml
@@ -96,7 +97,7 @@ export INJECTIONS_PATH=./injections.toml
 
 ---
 
-### 5. Resolve dependencies at runtime
+### 5. Resolve your dependencies
 
 ```python
 from duckdi import Get
@@ -111,16 +112,16 @@ print(user)  # {'id': '123', 'name': 'John Doe'}
 ## 💥 Error Handling
 
 ### `MissingInjectionPayloadError`
-Raised when the injection file is not found or not configured via `INJECTIONS_PATH`.
+Raised when no injection payload file is found at the specified path.
 
 ### `InvalidAdapterImplementationError`
-Raised when the registered adapter does not implement the required interface.
+Raised when the adapter registered does not implement the expected interface.
 
 ### `InterfaceAlreadyRegisteredError`
-Raised when an interface is registered twice with the same name or label.
+Raised when trying to register the same interface twice.
 
 ### `AdapterAlreadyRegisteredError`
-Raised when an adapter is registered more than once under the same label.
+Raised when the same adapter is registered more than once.
 
 ---
 
@@ -134,31 +135,31 @@ duckdi/
 │   └── duckdi/
 │       ├── __init__.py
 │       ├── cli.py
+│       ├── duck.py
 │       ├── errors/
 │       │   ├── __init__.py
-│       │   ├── adapter_already_registered_error.py
-│       │   ├── interface_already_registered_error.py
 │       │   ├── invalid_adapter_implementation_error.py
+│       │   ├── interface_already_registered_error.py
+│       │   ├── adapter_already_registered_error.py
 │       │   └── missing_injection_payload_error.py
-│       ├── injections/
-│       │   ├── injections_container.py
-│       │   ├── injections_payload.py
-│       └── utils/
-│           ├── __init__.py
-│           ├── buffer_readers.py
-│           ├── serializers.py
-│           └── to_snake.py
+│       ├── utils/
+│       │   ├── __init__.py
+│       │   ├── buffer_readers.py
+│       │   └── to_snake.py
+│       └── injections/
+│           ├── injections_container.py
+│           └── injections_payload.py
 └── tests/
-    ├── test_register.py
-    ├── test_get.py
     ├── test_interface.py
+    ├── test_register.py
+    └── test_get.py
 ```
 
 ---
 
 ## 🧩 Advanced Example
 
-Registering and resolving different services dynamically:
+You can register multiple adapters and resolve them dynamically based on the TOML mapping:
 
 ```python
 from duckdi import Interface, register, Get
@@ -175,7 +176,7 @@ register(EmailNotifier)
 
 # injections.toml
 # [injections]
-# "notifier" = "email_notifier"
+# "i_notifier" = "email_notifier"
 
 notifier = Get(INotifier)
 notifier.send("Hello from DuckDI!")
@@ -185,19 +186,19 @@ notifier.send("Hello from DuckDI!")
 
 ## 🧪 Testing
 
-DuckDI supports full static type checking. You can run tests with:
-
-```bash
-make test
-```
-
-Or directly:
+To run tests:
 
 ```bash
 pytest
 ```
 
-To check types and formatting:
+Or via Makefile:
+
+```bash
+make test
+```
+
+To check static typing:
 
 ```bash
 make check
@@ -208,11 +209,11 @@ make check
 ## 📄 License
 
 Licensed under the MIT License.  
-See the [LICENSE](LICENSE) file for details.
+See the [LICENSE](LICENSE) file for more information.
 
 ---
 
 ## 👤 Author
 
-Developed with ❤️ by **PhePato**  
-Pull requests, discussions, and contributions are always welcome!
+Made with ❤️ by **PhePato**  
+Pull requests, issues and ideas are always welcome!

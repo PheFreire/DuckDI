@@ -108,7 +108,6 @@ def Get[T](interface: Type[T], label: Optional[str] = None) -> Union[T, Type[T]]
     .   user_repo = Get(IUserRepository)
     """
     injections_payload = InjectionsPayload().load()
-    breakpoint()
     interface_name = label if label is not None else to_snake(interface)
     adapter = InjectionsContainer.adapters[injections_payload[interface_name]]
 
