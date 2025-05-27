@@ -13,4 +13,3 @@ Suggestion:
 🔁 Check your container or bootstrapping logic to ensure that '{interface_name}' is only registered once.
 """.strip()
         super().__init__(message)
-

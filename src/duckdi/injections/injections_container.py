@@ -1,8 +1,12 @@
-from duckdi.errors import InvalidAdapterImplementationError, InterfaceAlreadyRegisteredError
-from duckdi.errors.adapter_already_registered_error import AdapterAlreadyRegisteredError
-from duckdi.injections.injections_payload import InjectionsPayload
 from typing import Any, Optional, Type, Union
+
+from duckdi.errors import (InterfaceAlreadyRegisteredError,
+                           InvalidAdapterImplementationError)
+from duckdi.errors.adapter_already_registered_error import \
+    AdapterAlreadyRegisteredError
+from duckdi.injections.injections_payload import InjectionsPayload
 from duckdi.utils import to_snake
+
 
 class InjectionsContainer:
     """
@@ -12,6 +16,7 @@ class InjectionsContainer:
         - adapters (dict): Maps the serialized interface name to its registered adapter class.
         - interfaces (dict): Maps the serialized interface name to its interface class.
     """
+
     adapters: dict[str, Any] = {}
     interfaces: dict[str, Type] = {}
 
@@ -45,17 +50,19 @@ def Interface[T](interface: Type[T], label: Optional[str] = None) -> Type[T]:
     interface_name = label if label is not None else to_snake(interface)
     if InjectionsContainer.interfaces.get(interface_name) is not None:
         raise InterfaceAlreadyRegisteredError(interface_name)
-               
+
     InjectionsContainer.interfaces[interface_name] = interface
     return interface
 
 
-def register[T](adapter: Type[T], label: Optional[str] = None, is_singleton: bool = False) -> None:
+def register[T](
+    adapter: Type[T], label: Optional[str] = None, is_singleton: bool = False
+) -> None:
     """
     # Registers an adapter (concrete implementation) for a previously registered interface.
 
-    # This function maps an implementation class (adapter) to a label, making it available 
-    # for runtime resolution via the Get function. It also supports singleton behavior by 
+    # This function maps an implementation class (adapter) to a label, making it available
+    # for runtime resolution via the Get function. It also supports singleton behavior by
     # storing an already-instantiated adapter instance if `is_singleton` is set to True.
 
     # Args:
@@ -76,7 +83,7 @@ def register[T](adapter: Type[T], label: Optional[str] = None, is_singleton: boo
     .   register(PostgresUserRepository, is_singleton=True)
     """
     adapter_name = label if label is not None else to_snake(adapter)
-    
+
     if InjectionsContainer.adapters.get(adapter_name) is not None:
         raise AdapterAlreadyRegisteredError(adapter_name)
 
@@ -113,13 +120,12 @@ def Get[T](interface: Type[T], label: Optional[str] = None) -> Union[T, Type[T]]
 
     if not isinstance(adapter, type):
         if not isinstance(adapter, interface):
-            raise InvalidAdapterImplementationError(interface.__name__, type(adapter).__name__)
-        return adapter 
+            raise InvalidAdapterImplementationError(
+                interface.__name__, type(adapter).__name__
+            )
+        return adapter
 
     if not issubclass(adapter, interface):
         raise InvalidAdapterImplementationError(interface.__name__, adapter.__name__)
 
     return adapter()
-
-
-

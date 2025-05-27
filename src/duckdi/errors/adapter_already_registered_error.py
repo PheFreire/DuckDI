@@ -16,4 +16,3 @@ Example:
     register(MyAdapter, label="{adapter_name}")  # Check if this call is being repeated
 """.strip()
         super().__init__(message)
-

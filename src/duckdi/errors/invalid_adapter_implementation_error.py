@@ -16,4 +16,3 @@ Suggestion:
     = "{adapter_name}"
 """.strip()
         super().__init__(message)
-

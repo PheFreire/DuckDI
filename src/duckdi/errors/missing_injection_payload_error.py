@@ -23,4 +23,3 @@ Then, specify the injection file path by setting the environment variable:
 This variable is required so DuckDi knows where to find the injection payload.
 """.strip()
         super().__init__(message)
-
