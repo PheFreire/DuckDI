@@ -1,4 +1,4 @@
-from typing import Any, Optional, Type, Union
+from typing import Any, Callable, Optional, Type, Union
 
 from duckdi.errors import (InterfaceAlreadyRegisteredError,
                            InvalidAdapterImplementationError)
@@ -21,7 +21,7 @@ class InjectionsContainer:
     interfaces: dict[str, Type] = {}
 
 
-def Interface[T](interface: Type[T], label: Optional[str] = None) -> Type[T]:
+def Interface[T](_interface: Optional[Type[T]] = None, *, label: Optional[str] = None) -> Union[Type[T], Callable[[Type[T]], Type[T]]]:
     """
     # Registers an interface for dependency injection.
     # This function is used to declare an interface that can later be mapped to an adapter implementation.
@@ -47,12 +47,18 @@ def Interface[T](interface: Type[T], label: Optional[str] = None) -> Type[T]:
     .   class IUserRepository:
     .       ...
     """
-    interface_name = label if label is not None else to_snake(interface)
-    if InjectionsContainer.interfaces.get(interface_name) is not None:
-        raise InterfaceAlreadyRegisteredError(interface_name)
+    def wrap(_interface: Type[T]) -> Type[T]:
+        interface_name = label if label is not None else to_snake(_interface)
+        if InjectionsContainer.interfaces.get(interface_name) is not None:
+            raise InterfaceAlreadyRegisteredError(interface_name)
 
-    InjectionsContainer.interfaces[interface_name] = interface
-    return interface
+        InjectionsContainer.interfaces[interface_name] = _interface
+        return _interface
+
+    if _interface is not None and isinstance(_interface, type):
+        return wrap(_interface)
+
+    return wrap
 
 
 def register[T](
