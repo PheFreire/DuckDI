@@ -90,7 +90,7 @@ def register[T](
     InjectionsContainer.adapters[adapter_name] = adapter() if is_singleton else adapter
 
 
-def Get[T](interface: Type[T], label: Optional[str] = None) -> Union[T, Type[T]]:
+def Get[T](interface: Type[T], label: Optional[str] = None) -> T:
     """
     # Resolves and returns an instance of the adapter associated with the given interface.
     # This function is the main entry point for resolving dependencies no runtime.
