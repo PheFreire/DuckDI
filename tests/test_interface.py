@@ -1,8 +1,8 @@
 import pytest
 
-from duckdi import Interface
+from duckdi.modules.injections_container import InjectionsContainer
 from duckdi.errors import InterfaceAlreadyRegisteredError
-from duckdi.injections.injections_container import InjectionsContainer
+from duckdi import Interface
 
 
 def setup_function():

@@ -1,10 +1,9 @@
 from unittest.mock import patch
 
-import pytest
-
-from duckdi import Get, Interface, register
+from duckdi.modules.injections_container import InjectionsContainer
 from duckdi.errors import InvalidAdapterImplementationError
-from duckdi.injections.injections_container import InjectionsContainer
+from duckdi import Get, Interface, register
+import pytest
 
 
 def setup_function():
@@ -21,7 +20,7 @@ def test_get_transient_instance():
     register(Service)
 
     with patch(
-        "duckdi.injections.injections_payload.InjectionsPayload.load",
+        "duckdi.modules.injections_payload.InjectionsPayload.load",
         return_value={"i_service": "service"},
     ):
         resolved = Get(IService)
@@ -37,7 +36,7 @@ def test_get_singleton_instance():
     register(Service, is_singleton=True)
 
     with patch(
-        "duckdi.injections.injections_payload.InjectionsPayload.load",
+        "duckdi.modules.injections_payload.InjectionsPayload.load",
         return_value={"i_service": "service"},
     ):
         resolved = Get(IService)
@@ -53,7 +52,7 @@ def test_get_invalid_adapter():
     InjectionsContainer.adapters["invalid"] = Invalid
 
     with patch(
-        "duckdi.injections.injections_payload.InjectionsPayload.load",
+        "duckdi.modules.injections_payload.InjectionsPayload.load",
         return_value={"i_service": "invalid"},
     ):
         with pytest.raises(InvalidAdapterImplementationError):

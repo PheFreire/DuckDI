@@ -1,8 +1,7 @@
-import os
-from os import getcwd, getenv
-
 from duckdi.utils import read_toml
-
+from os.path import join as __join
+from os import getcwd as __getcwd
+from os import getenv as __getenv
 
 class InjectionsPayload:
     def load(self) -> dict[str, str]:
@@ -17,7 +16,7 @@ class InjectionsPayload:
             FileNotFoundError: If the file does not exist.
             tomllib.TOMLDecodeError: If the file is not a valid TOML.
         """
-        injections_path = getenv(
-            "INJECTIONS_PATH", os.path.join(getcwd(), "injections.toml")
+        injections_path = __getenv(
+            "INJECTIONS_PATH", __join(__getcwd(), "injections.toml")
         )
         return read_toml(injections_path)["injections"]
