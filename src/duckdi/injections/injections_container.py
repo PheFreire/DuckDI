@@ -47,19 +47,17 @@ def Interface[T](_interface: Optional[Type[T]] = None, *, label: Optional[str] =
     .   class IUserRepository:
     .       ...
     """
-    def wrap(_interface: Type[T]) -> Type[T]:
-        interface_name = label if label is not None else to_snake(_interface)
+    def wrap(cls: Type[T]) -> Type[T]:
+        interface_name = label if label is not None else to_snake(cls)
         if InjectionsContainer.interfaces.get(interface_name) is not None:
             raise InterfaceAlreadyRegisteredError(interface_name)
 
-        InjectionsContainer.interfaces[interface_name] = _interface
-        return _interface
+        InjectionsContainer.interfaces[interface_name] = cls
+        return cls
 
-    if _interface is not None and isinstance(_interface, type):
+    if _interface is not None:
         return wrap(_interface)
-
     return wrap
-
 
 def register[T](
     adapter: Type[T], label: Optional[str] = None, is_singleton: bool = False

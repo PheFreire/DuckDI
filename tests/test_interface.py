@@ -24,3 +24,23 @@ def test_interface_registration_duplicate():
 
         @Interface
         class IService: ...
+
+
+def test_interface_registration_with_label():
+    @Interface(label="custom_label")
+    class IFakeService:
+        pass
+
+    assert "custom_label" in InjectionsContainer.interfaces
+    assert InjectionsContainer.interfaces["custom_label"] is IFakeService
+
+
+def test_interface_duplicate_label_raises_error():
+    @Interface(label="duplicate")
+    class IFoo:
+        pass
+
+    with pytest.raises(InterfaceAlreadyRegisteredError):
+        @Interface(label="duplicate")
+        class IBar:
+            pass
