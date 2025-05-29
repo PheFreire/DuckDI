@@ -4,7 +4,7 @@ from duckdi.errors.interface_already_registered import InterfaceAlreadyRegistere
 from duckdi.modules.injections_container import InjectionsContainer
 from duckdi.utils.serializers import to_snake
 
-T = TypeVar("T", bound=type)
+T = TypeVar("T")
 
 @overload
 def Interface(_interface: Type[T]) -> Type[T]: ...
