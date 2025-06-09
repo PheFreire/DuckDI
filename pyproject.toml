@@ -1,6 +1,6 @@
 [project]
 name = "duckdi"
-version = "0.1.8"
+version = "0.1.9"
 description = "🦆 A minimal dependency injection library for Python"
 authors = [{ name = "Phe Pato", email = "pheprogrammer@gmail.com" }]
 packages = [{include = "duckdi", from = "src"}]
