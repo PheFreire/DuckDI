@@ -57,3 +57,23 @@ def test_get_invalid_adapter():
     ):
         with pytest.raises(InvalidAdapterImplementationError):
             Get(IService)
+
+def test_get_service_by_label():
+    @Interface(label="service")
+    class IService:
+        pass
+
+    class Service(IService):
+        pass
+
+    # Registro com nome "adapter"
+    register(Service, "adapter", is_singleton=True)
+
+    # Mocka o carregamento da configuração de labels
+    with patch(
+        "duckdi.modules.injections_payload.InjectionsPayload.load",
+        return_value={"service": "adapter"},
+    ):
+        adapter = Get(IService, label="service")
+        assert isinstance(adapter, Service)
+
