@@ -51,7 +51,7 @@ check: check-bandit check-black check-flake8 check-mypy ## run all checks
 
 test: ## run tests
 	echo "🧪 Running tests with \033[36mpytest\033[0m..."
-	poetry run pytest | tee tests.log
+	pytest -q --tb=short
 
 ##@ Publish
 
