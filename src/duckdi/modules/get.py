@@ -62,7 +62,7 @@ def Get(interface: Type[T], label: Optional[str] = None, adapter: Optional[str] 
             raise InvalidAdapterImplementationError(
                 interface.__name__, type(_adapter).__name__
             )
-        return _adapter
+        return _adapter if instance else type(_adapter)
 
     if not issubclass(_adapter, interface):
         raise InvalidAdapterImplementationError(interface.__name__, _adapter.__name__)
